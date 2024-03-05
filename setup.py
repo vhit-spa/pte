@@ -1,15 +1,15 @@
 from setuptools import setup, find_packages
 
 #Vars
-ROOT='src'
+ROOT='vhit_pte'
 
-with open('requirements.txt') as f:
+with open('requirements.txt','r') as f:
     rqs = f.read().splitlines()
 
 #Setup call
 setup(
     # Default parameters
-    name='vhit_pte',
+    name='vhit-pte',
     version='0.1.0',
     description=__doc__,
 
