@@ -3,6 +3,8 @@ from ..utils import MapParser
 from logging import Logger
 from typing import Any
 
+__all__ = ['MTMInterface']
+
 class MTMInterface():
     '''Micro To Machine interface class
     This class provide standarized way to interact to the micro via
