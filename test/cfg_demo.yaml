@@ -1,0 +1,5 @@
+project: prj_demo
+sw_version: XXXXYY
+req_version: VZ_DEMO
+mode: auto
+symtable_path: C:\Users\CMM2OFO\Documents\Repos\elop_057\out\lst\ELOP057_.map

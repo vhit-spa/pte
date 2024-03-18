@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from vhit_pte import __version__
 
 #Vars
 ROOT='vhit_pte'
@@ -9,8 +10,10 @@ with open('requirements.txt','r') as f:
 #Setup call
 setup(
     # Default parameters
+    author="Camagni Matteo",
+    author_email='external.matteo.camagni@vhit-weifu.com',
     name='vhit-pte',
-    version='0.1.0',
+    version=__version__.VERSION,
     description=__doc__,
 
     # Package info
@@ -18,5 +21,12 @@ setup(
 
     # Requirements
     install_requires=rqs,
+
+    #Entry point -> cmd line tools
+    entry_points={
+        'console_scripts': [
+            'vhit_behave = vhit_pte.launcher:main',
+        ]
+    }
 
 )
