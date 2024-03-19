@@ -11,6 +11,7 @@ import platform
 import argparse
 from pathlib import Path
 from ..__version__ import VERSION
+from shutil import copytree, rmtree
 from behave.__main__ import main as behave_ep
 
 __PTE_NAME__ = 'vhit_pte'
@@ -93,9 +94,7 @@ def behave_default_args(args: dict) -> list:
 
     #Manual testing setup
     if args['mode'] == 'manual':
-        manual_path = str(Path(__file__).parent / 'steps' / 'manual')
-        print(manual_path)
-        res += ['--no-capture','--stage', manual_path]
+        res += ['--no-capture','--stage', 'manual']
 
     return res
 
@@ -158,6 +157,18 @@ def behave_pretty_formatter_cfg(args: dict) -> list:
 
     return cfg
 
+# --- MANUAL MODE ---
+def create_temp_manual_steps(args:dict):
+    if args['mode'] == 'manual':
+        copytree(
+            src=str(Path(__file__).parents[1] / 'steps' / 'manual_steps' ),
+            dst=str(Path(os.getcwd()) / 'manual_steps'),
+            dirs_exist_ok=True,
+        )
+
+def delete_temp_manual_steps(args:dict):
+    if args['mode'] == 'manual':
+        rmtree(f"{os.getcwd()}\\manual_steps")
 
 # --- MAIN ---
 def main() -> None:
@@ -165,10 +176,12 @@ def main() -> None:
     cmd_args: list = \
         behave_default_args(args) + \
         behave_pretty_formatter_cfg(args)
-
     print(cmd_args)
-    behave_ep(cmd_args)
-    
+    try:
+        create_temp_manual_steps(args)
+        behave_ep(cmd_args)
+    except:
+        delete_temp_manual_steps(args)
 
 if __name__ == '__main__':
     #sys.argv = 'python --conf_file_path C:\\Users\\CMM2OFO\\Documents\\Repos\\pte\\test\\cfg_demo.yaml'.split()

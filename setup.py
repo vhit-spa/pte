@@ -27,6 +27,10 @@ setup(
         'console_scripts': [
             'vhit_behave = vhit_pte.launcher:main',
         ]
-    }
+    },
+
+    # #Pack data
+    # package_data={'vhit_pte' :['vhit_pte/steps/manual_steps/*']},
+    # include_package_data=True,
 
 )
