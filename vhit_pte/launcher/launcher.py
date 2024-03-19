@@ -176,14 +176,13 @@ def main() -> None:
     cmd_args: list = \
         behave_default_args(args) + \
         behave_pretty_formatter_cfg(args)
-    print(cmd_args)
     try:
         create_temp_manual_steps(args)
         behave_ep(cmd_args)
     except:
-        delete_temp_manual_steps(args)
+        pass
+    delete_temp_manual_steps(args)
 
 if __name__ == '__main__':
-    #sys.argv = 'python --conf_file_path C:\\Users\\CMM2OFO\\Documents\\Repos\\pte\\test\\cfg_demo.yaml'.split()
     sys.exit(main())
 
