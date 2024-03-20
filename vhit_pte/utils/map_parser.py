@@ -3,7 +3,7 @@ from json import dumps
 from pathlib import Path
 from prettytable import PrettyTable
 from abc import ABC, abstractmethod
-from typing import List, TextIO, Any, Iterator
+from typing import List, TextIO, Any, Tuple
 
 __all__ = ['MapParser']
 
@@ -41,7 +41,7 @@ class MapBlock(ABC):
     def get_mapvalues(
         self,
         filter_dict: dict,
-        res_keys: str | list,
+        res_keys: dict,
         unique: bool = False,
         with_key: bool = False,
     ) -> dict:
@@ -52,8 +52,6 @@ class MapBlock(ABC):
             filter_dict[k] = re.compile(filter_dict[k])
 
         row_i: int = 0
-
-        res_keys = [res_keys] if isinstance(res_keys, str) else res_keys
 
         for k in res_keys:
             out_dict.update({k: []})
@@ -67,7 +65,8 @@ class MapBlock(ABC):
 
             if is_matching:
                 for k in res_keys:
-                    out_dict[k].append(self._table[k][row_i])
+                    cast_val = res_keys[k](self._table[k][row_i])
+                    out_dict[k].append(cast_val)
 
             row_i += 1
 
@@ -118,15 +117,31 @@ Image Symbol Table
 class MapParser:
     """Main map parser class"""
 
-    def __init__(self) -> None:
+    def __init__(self, src_path: str, debug: bool=False) -> None:
         self._container: dict = None
         self._blocks: list[MapBlock] = [BlockB1()]
         self._block_map: dict = {
             "ImageSymbolTable": self._blocks[0],
         }
+        self._src_path: str = src_path
+        self._debug: str = debug
+        self.__icd: dict = None
 
-    def parse(self, src_path: str, _debug: bool=False) -> None:
-        src = Path(src_path)
+        self.__parse()
+        self.__update_icd()
+
+    def __update_icd(self) -> None:
+
+        res_types: dict = {
+            "symbol_name": str,
+            "value": lambda x: int(x,16),
+            "size": int,
+        }
+
+        self.__icd = self.get_block("ImageSymbolTable").get_mapvalues({"type": "Data"}, res_types)
+
+    def __parse(self) -> None:
+        src = Path(self._src_path)
 
         # Check the existince of the file
         assert src.exists(), "The input file [%s] does not exist" % src_path
@@ -142,7 +157,7 @@ class MapParser:
 
                     # Debug
                     if b >= 0:
-                        if _debug:
+                        if self._debug:
                             with open("exit_%s" % b, "w") as u:
                                 u.write(dumps(self._blocks[b].__dict__["_table"], indent=1))
 
@@ -161,9 +176,11 @@ class MapParser:
 
     @property
     def icd(self) -> dict:
-        return self.get_block("ImageSymbolTable").get_mapvalues(
-            {"type": "Data", "symbol_name": "\w+\_[a-z]\d+.*"}, ["symbol_name", "value"]
-        )
+        return self.__icd
+    
+    def get_icd_data(self, data_name: str) -> dict:
+        i = self.__icd["symbol_name"].index(data_name)
+        return {k:v[i] for k,v in self.icd.items()}
     
     def print_icd(self)-> None:
         pt = PrettyTable()
@@ -171,5 +188,3 @@ class MapParser:
             pt.add_column(k, v)
 
         print(pt)
-
-
